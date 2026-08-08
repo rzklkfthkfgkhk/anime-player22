@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeStream — Аниме Каталог</title>
+    <title>AnimeStream — Твой аниме мир</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header class="header">
-        <div class="container header-container">
-            <a href="#" class="logo" id="logo">Anime<span>Stream</span></a>
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Поиск аниме на английском или ромадзи...">
-                <button id="search-btn">Найти</button>
-            </div>
+    <header>
+        <div class="logo">Anime<span>Stream</span></div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск аниме...">
+            <button id="searchBtn">Найти</button>
         </div>
     </header>
 
-    <main class="container">
-        <!-- Блок плеера -->
-        <section id="player-section" class="player-section hidden">
-            <button id="close-player" class="btn-close">✕ Закрыть</button>
-            <h2 id="player-title" class="anime-title"></h2>
-            <div class="video-container">
-                <iframe id="video-player" src="" frameborder="0" allowfullscreen></iframe>
-            </div>
-            <div id="anime-info" class="anime-info"></div>
-        </section>
-
-        <!-- Каталог -->
-        <section class="catalog-section">
-            <h2 id="catalog-heading" class="section-title">Популярное аниме</h2>
-            <div id="anime-grid" class="anime-grid">
-                <div class="loader">Инициализация...</div>
-            </div>
-        </section>
+    <main>
+        <div id="animeGrid" class="anime-grid">
+            <!-- Сюда будут попадать карточки из JS -->
+            <div class="welcome-msg">Введите название, чтобы начать просмотр</div>
+        </div>
     </main>
+
+    <!-- Модальное окно для плеера -->
+    <div id="playerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="playerContainer">
+                <!-- Здесь будет iframe плеера -->
+            </div>
+            <div id="animeDetails">
+                <h2 id="modalTitle"></h2>
+                <p id="modalDesc"></p>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
