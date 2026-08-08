@@ -1,43 +1,52 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeStream — Твой аниме мир</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>ANIME PRO | Premium Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #050505; color: white; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .text-gradient { background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .anime-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anime-card:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0, 242, 254, 0.2); }
+        .skeleton { background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .modal-enter { animation: modalFadeIn 0.3s ease-out; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4facfe; }
+    </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">Anime<span>Stream</span></div>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Поиск аниме...">
-            <button id="searchBtn">Найти</button>
+    <!-- Навигация -->
+    <nav class="fixed top-0 w-full z-50 glass px-6 py-4 flex items-center justify-between">
+        <div class="text-2xl font-bold tracking-tighter cursor-pointer" onclick="fetchTrending()">
+            <span class="text-white">ANIME</span><span class="text-gradient">PRO</span>
         </div>
-    </header>
 
-    <main>
-        <div id="animeGrid" class="anime-grid">
-            <!-- Сюда будут попадать карточки из JS -->
-            <div class="welcome-msg">Введите название, чтобы начать просмотр</div>
-        </div>
-    </main>
-
-    <!-- Модальное окно для плеера -->
-    <div id="playerModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div id="playerContainer">
-                <!-- Здесь будет iframe плеера -->
-            </div>
-            <div id="animeDetails">
-                <h2 id="modalTitle"></h2>
-                <p id="modalDesc"></p>
+        <div class="flex items-center gap-4 w-1/2 max-w-md">
+            <div class="relative w-full">
+                <input type="text" id="searchInput" 
+                    class="w-full bg-[#111] border border-white/10 rounded-full py-2 px-5 focus:outline-none focus:border-[#4facfe] transition-all"
+                    placeholder="Поиск аниме...">
+                <button id="searchBtn" class="absolute right-2 top-1/2 -translate-y-1/2 bg-[#4facfe] text-black px-4 py-1 rounded-full text-sm font-bold hover:bg-[#00f2fe] transition-all">
+                    Go
+                </button>
             </div>
         </div>
-    </div>
 
-    <script src="app.js"></script>
-</body>
-</html>
+        <div class="hidden md:flex gap-6 text-sm font-medium text-gray-400">
+            <button onclick="fetchTrending()" class="hover:text-white transition">Home</button>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-[#4facfe] to-[#00f2fe] cursor-pointer"></div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-32 pb-10 px-6 text-center">
