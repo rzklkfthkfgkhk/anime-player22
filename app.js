@@ -1,156 +1,106 @@
-const ANILIST_API = 'https://anilist.co';
-const animeGrid = document.getElementById('anime-grid');
-const searchInput = document.getElementById('search-input');
-const searchBtn = document.getElementById('search-btn');
-const catalogHeading = document.getElementById('catalog-heading');
-const logo = document.getElementById('logo');
 
-const playerSection = document.getElementById('player-section');
-const playerTitle = document.getElementById('player-title');
-const videoPlayer = document.getElementById('video-player');
-const animeInfo = document.getElementById('anime-info');
-const closePlayerBtn = document.getElementById('close-player');
 
-// Оптимизированный GraphQL-скрипт запроса
-const animeQuery = `
-query ($search: String, $perPage: Int) {
-  Page(perPage: $perPage) {
-    media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
-      id
-      idMal
-      title {
-        romaji
-        english
-        userPreferred
+---
+
+#### 3. `app.js`
+Логика запросов к AniList и управление интерфейсом.
+
+```javascript
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const animeGrid = document.getElementById('animeGrid');
+const modal = document.getElementById('playerModal');
+const closeModal = document.querySelector('.close-modal');
+
+// GraphQL запрос к AniList
+async function searchAnime(query) {
+    const graphqlQuery = `
+    query ($search: String) {
+      Media (search: $search, type: ANIME) {
+        id
+        title { romaji english }
+        coverImage { large }
+        description
+        averageScore
       }
-      coverImage {
-        large
-      }
-      startDate {
-        year
-      }
-      description
     }
-  }
-}`;
+    `;
 
-// Функция GET-запроса через URL-параметры (успешно обходит CORS на локальном ПК)
-async function fetchAnime(searchQuery = null) {
-    animeGrid.innerHTML = '<div class="loader">Синхронизация с AniList...</div>';
-    
-    const variables = { perPage: 24 };
-    if (searchQuery) {
-        variables.search = searchQuery;
-    }
+    const response = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: graphqlQuery,
+            variables: { search: query }
+        })
+    });
 
-    // Кодируем GraphQL запрос в формат URL-GET параметров
-    const url = `${ANILIST_API}?query=${encodeURIComponent(animeQuery)}&variables=${encodeURIComponent(JSON.stringify(variables))}`;
-
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка соединения. Статус: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (data.errors) {
-            console.error("Крическая ошибка структуры данных:", data.errors);
-            animeGrid.innerHTML = '<div class="loader" style="color: #ff4a4a;">Ошибка обработки структуры API AniList.</div>';
-            return;
-        }
-
-        renderAnimeList(data.data.Page.media);
-    } catch (error) {
-        console.error("Потеряно соединение:", error);
-        animeGrid.innerHTML = `
-            <div class="loader" style="color: #ff4a4a; font-size: 14px; text-align: left; max-width: 600px; margin: 0 auto;">
-                <strong>Ошибка сетевого подключения к серверам AniList!</strong><br><br>
-                <span>Возможные причины:</span><br>
-                1. Локальные ограничения браузера на выполнение внешних скриптов.<br>
-                2. Сторонние плагины или AdBlock блокируют поддомены Graphql.<br><br>
-                <strong>Решение:</strong> Перетащите папку с сайтом на бесплатную платформу <a href="https://netlify.com" target="_blank" style="color:#45f3ff;">Netlify Drop</a>. Сайт запустится на удаленном сервере и всё заработает мгновенно.
-            </div>`;
-    }
+    const data = await response.json();
+    return data.data.Media;
 }
 
-function renderAnimeList(animeList) {
+// Функция отрисовки карточек
+function displayAnime(animeList) {
     animeGrid.innerHTML = '';
-    if (!animeList || animeList.length === 0) {
-        animeGrid.innerHTML = '<div class="loader">Ничего не найдено.</div>';
+    if (!animeList) {
+        animeGrid.innerHTML = '<p>Ничего не найдено</p>';
         return;
     }
 
     animeList.forEach(anime => {
-        const title = anime.title.english || anime.title.romaji || anime.title.userPreferred;
         const card = document.createElement('div');
         card.className = 'anime-card';
-        
+        const title = anime.title.english || anime.title.romaji;
+
         card.innerHTML = `
-            <img src="${anime.coverImage.large}" alt="${title}" loading="lazy">
+            <img src="${anime.coverImage.large}" alt="${title}">
             <div class="anime-card-info">
-                <div class="anime-card-title">${title}</div>
-                <div class="anime-card-year">${anime.startDate.year || '—'}</div>
+                <h3>${title}</h3>
+                <p>⭐ ${anime.averageScore || 'N/A'}</p>
             </div>
         `;
 
-        card.addEventListener('click', () => openPlayer(anime));
+        card.onclick = () => openPlayer(anime);
         animeGrid.appendChild(card);
     });
 }
 
+// Функция открытия плеера
 function openPlayer(anime) {
-    const title = anime.title.english || anime.title.romaji || anime.title.userPreferred;
-    playerTitle.textContent = title;
-    
-    // Подгрузка бесплатного плеера без токенов по ID Shikimori/MAL
-    if (anime.idMal) {
-        videoPlayer.src = `https://delivembed.cc{anime.idMal}`;
-    } else {
-        videoPlayer.src = `https://delivembed.cc{encodeURIComponent(anime.title.romaji)}`;
-    }
+    const title = anime.title.english || anime.title.romaji;
+    const desc = anime.description;
 
-    animeInfo.innerHTML = `
-        <div style="margin-top: 15px; font-size: 14px;">
-            <strong>Сюжетная линия (ENG):</strong><br>
-            ${anime.description ? anime.description : 'Описание отсутствует.'}
-        </div>
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalDesc').innerText = desc.replace(/<[^>]*>?/gm, ''); // Очистка HTML тегов
+
+    // Трюк для плеера: используем сторонний сервис (например, Kodik или подобные)
+    // ВНИМАНИЕ: В реальности здесь должна быть ссылка на плеер, работающую с ID из AniList.
+    // Для примера используем заглушку. Многие используют поиск по названию в сторонних API.
+    const playerContainer = document.getElementById('playerContainer');
+    playerContainer.innerHTML = `
+        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
     `;
+    // Подсказка: Для реального плеера обычно используют: `https://api.provider.com/embed/${anime.id}`
 
-    playerSection.classList.remove('hidden');
-    window.scrollTo({ top: playerSection.offsetTop - 90, behavior: 'smooth' });
+    modal.style.display = "block";
 }
 
-closePlayerBtn.addEventListener('click', () => {
-    playerSection.classList.add('hidden');
-    videoPlayer.src = ''; 
-});
-
-searchBtn.addEventListener('click', () => {
-    const text = searchInput.value.trim();
-    if (text) {
-        catalogHeading.textContent = `Результаты поиска по: "${text}"`;
-        fetchAnime(text);
-    }
-});
+// События
+searchBtn.onclick = async () => {
+    const query = searchInput.value;
+    if (!query) return;
+    animeGrid.innerHTML = '<p>Загрузка...</p>';
+    const results = await searchAnime(query);
+    displayAnime(results);
+};
 
 searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchBtn.click();
 });
 
-logo.addEventListener('click', (e) => {
-    e.preventDefault();
-    searchInput.value = '';
-    catalogHeading.textContent = 'Популярное аниме';
-    fetchAnime();
-});
+closeModal.onclick = () => {
+    modal.style.display = "none";
+    document.getElementById('playerContainer').innerHTML = ''; // Остановить видео при закрытии
+};
 
-// Первичный вызов пула популярных тайтлов
-fetchAnime();
+window.onclick = (event) => {
