@@ -12,7 +12,6 @@ const videoPlayer = document.getElementById('video-player');
 const animeInfo = document.getElementById('anime-info');
 const closePlayerBtn = document.getElementById('close-player');
 
-// ИСПРАВЛЕННЫЙ GraphQL запрос: переменная $search теперь корректно передается в аргумент search: $search
 const animeQuery = `
 query ($search: String, $perPage: Int) {
   Page(perPage: $perPage) {
@@ -35,14 +34,10 @@ query ($search: String, $perPage: Int) {
   }
 }`;
 
-// Функция отправки запроса к AniList
 async function fetchAnime(searchQuery = null) {
     animeGrid.innerHTML = '<div class="loader">Загрузка аниме...</div>';
     
-    // Формируем параметры. Если searchQuery пустой, AniList вернет просто популярные тайтлы
-    const variables = {
-        perPage: 24
-    };
+    const variables = { perPage: 24 };
     if (searchQuery) {
         variables.search = searchQuery;
     }
@@ -52,7 +47,7 @@ async function fetchAnime(searchQuery = null) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 query: animeQuery,
@@ -60,26 +55,40 @@ async function fetchAnime(searchQuery = null) {
             })
         });
 
+        // Проверяем, ответил ли сервер успехом (код 200-299)
+        if (!response.ok) {
+            throw new Error(`Сервер ответил со статусом ${response.status}`);
+        }
+
         const data = await response.json();
         
-        // Если API AniList вернул внутреннюю ошибку валидации
         if (data.errors) {
             console.error("Ошибки AniList API:", data.errors);
-            animeGrid.innerHTML = '<div class="loader" style="color: #ff4a4a;">Ошибка синтаксиса запроса. Проверьте консоль.</div>';
+            animeGrid.innerHTML = '<div class="loader" style="color: #ff4a4a;">Ошибка синтаксиса AniList. Подробности в консоли (F12).</div>';
             return;
         }
 
         renderAnimeList(data.data.Page.media);
     } catch (error) {
-        console.error("Сетевая ошибка при работе с AniList API:", error);
-        animeGrid.innerHTML = '<div class="loader" style="color: #ff4a4a;">Ошибка загрузки. Попробуйте еще раз.</div>';
+        console.error("Сетевая ошибка:", error);
+        
+        // Показываем конкретную техническую ошибку на экране для диагностики
+        animeGrid.innerHTML = `
+            <div class="loader" style="color: #ff4a4a; font-size: 14px; line-height: 1.8;">
+                <strong>Ошибка сетевого запроса!</strong><br>
+                Подробности: ${error.message}<br><br>
+                <span style="color: #fff; font-size: 13px;">
+                    💡 <strong>Как исправить:</strong><br>
+                    1. Если вы открыли файл как <code>file:///...</code>, браузер мог заблокировать запрос. Попробуйте загрузить папку на бесплатный хостинг (например, <a href="https://github.com" target="_blank" style="color: #45f3ff;">GitHub Pages</a> или Netlify).<br>
+                    2. Убедитесь, что у вас отключены строгие блокировщики рекламы (AdBlock) или VPN, которые могут блокировать запросы к домену graphql.anilist.co.
+                </span>
+            </div>
+        `;
     }
 }
 
-// Отображение карточек на странице
 function renderAnimeList(animeList) {
     animeGrid.innerHTML = '';
-    
     if (!animeList || animeList.length === 0) {
         animeGrid.innerHTML = '<div class="loader">Ничего не найдено.</div>';
         return;
@@ -98,20 +107,15 @@ function renderAnimeList(animeList) {
             </div>
         `;
 
-        card.addEventListener('click', () => {
-            openPlayer(anime);
-        });
-
+        card.addEventListener('click', () => openPlayer(anime));
         animeGrid.appendChild(card);
     });
 }
 
-// Открытие плеера при клике на аниме
 function openPlayer(anime) {
     const title = anime.title.english || anime.title.romaji || anime.title.userPreferred;
     playerTitle.textContent = title;
     
-    // Используем idMal (MyAnimeList / Shikimori ID) для интеграции с бесплатным плеером
     if (anime.idMal) {
         videoPlayer.src = `https://delivembed.cc{anime.idMal}`;
     } else {
@@ -129,7 +133,6 @@ function openPlayer(anime) {
     window.scrollTo({ top: playerSection.offsetTop - 100, behavior: 'smooth' });
 }
 
-// События интерфейса
 closePlayerBtn.addEventListener('click', () => {
     playerSection.classList.add('hidden');
     videoPlayer.src = ''; 
@@ -144,9 +147,7 @@ searchBtn.addEventListener('click', () => {
 });
 
 searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        searchBtn.click();
-    }
+    if (e.key === 'Enter') searchBtn.click();
 });
 
 logo.addEventListener('click', (e) => {
@@ -156,5 +157,4 @@ logo.addEventListener('click', (e) => {
     fetchAnime();
 });
 
-// Стартовая инициализация каталога популярных аниме
 fetchAnime();
