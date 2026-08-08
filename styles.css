@@ -1,6 +1,7 @@
 :root {
     --bg-main: #0b0c10;
-    --bg-card: #1f2833;
+    --bg-card: #151a21;
+    --bg-header: #1f2833;
     --accent: #45f3ff;
     --text-main: #c5c6c7;
     --text-bright: #ffffff;
@@ -26,14 +27,13 @@ body {
     margin: 0 auto;
 }
 
-/* Шапка сайта */
 .header {
-    background-color: #151a21;
-    padding: 20px 0;
+    background-color: var(--bg-header);
+    padding: 15px 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 .header-container {
@@ -49,7 +49,6 @@ body {
     font-weight: 700;
     color: var(--text-bright);
     text-decoration: none;
-    letter-spacing: 1px;
 }
 
 .logo span {
@@ -71,9 +70,8 @@ body {
     border-right: none;
     border-radius: var(--border-radius) 0 0 var(--border-radius);
     color: var(--text-bright);
-    font-size: 16px;
+    font-size: 15px;
     outline: none;
-    transition: border 0.3s;
 }
 
 .search-box input:focus {
@@ -87,16 +85,10 @@ body {
     border: none;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 15px;
     cursor: pointer;
-    transition: opacity 0.3s;
 }
 
-.search-box button:hover {
-    opacity: 0.9;
-}
-
-/* Сетка каталога */
 .catalog-section {
     padding: 40px 0;
 }
@@ -115,21 +107,19 @@ body {
     gap: 25px;
 }
 
-/* Карточка аниме */
 .anime-card {
     background-color: var(--bg-card);
     border-radius: var(--border-radius);
     overflow: hidden;
     cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
     flex-direction: column;
-    position: relative;
 }
 
 .anime-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(69, 243, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(69, 243, 255, 0.15);
 }
 
 .anime-card img {
@@ -162,7 +152,6 @@ body {
     margin-top: auto;
 }
 
-/* Плеер */
 .player-section {
     background-color: var(--bg-card);
     padding: 25px;
@@ -179,12 +168,11 @@ body {
     background: transparent;
     border: 1px solid #ff4a4a;
     color: #ff4a4a;
-    padding: 8px 16px;
+    padding: 6px 14px;
     border-radius: 6px;
     cursor: pointer;
     float: right;
     font-weight: 600;
-    transition: 0.3s;
 }
 
 .btn-close:hover {
@@ -199,7 +187,7 @@ body {
 
 .video-container {
     position: relative;
-    padding-bottom: 56.25%; /* Пропорции 16:9 */
+    padding-bottom: 56.25%;
     height: 0;
     overflow: hidden;
     border-radius: var(--border-radius);
@@ -215,16 +203,10 @@ body {
     height: 100%;
 }
 
-.anime-description {
-    font-size: 14px;
-    color: var(--text-main);
-    margin-top: 15px;
-}
-
 .loader {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 50px;
-    font-size: 18px;
+    padding: 40px;
+    font-size: 16px;
     color: var(--accent);
 }
