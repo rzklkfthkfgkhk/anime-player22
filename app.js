@@ -5,13 +5,13 @@ const searchBtn = document.getElementById('search-btn');
 const catalogHeading = document.getElementById('catalog-heading');
 const logo = document.getElementById('logo');
 
-// Элементы плеера
 const playerSection = document.getElementById('player-section');
 const playerTitle = document.getElementById('player-title');
 const videoPlayer = document.getElementById('video-player');
 const animeInfo = document.getElementById('anime-info');
 const closePlayerBtn = document.getElementById('close-player');
 
+// Оптимизированный GraphQL-скрипт запроса
 const animeQuery = `
 query ($search: String, $perPage: Int) {
   Page(perPage: $perPage) {
@@ -34,56 +34,50 @@ query ($search: String, $perPage: Int) {
   }
 }`;
 
+// Функция GET-запроса через URL-параметры (успешно обходит CORS на локальном ПК)
 async function fetchAnime(searchQuery = null) {
-    animeGrid.innerHTML = '<div class="loader">Загрузка аниме...</div>';
+    animeGrid.innerHTML = '<div class="loader">Синхронизация с AniList...</div>';
     
     const variables = { perPage: 24 };
     if (searchQuery) {
         variables.search = searchQuery;
     }
 
+    // Кодируем GraphQL запрос в формат URL-GET параметров
+    const url = `${ANILIST_API}?query=${encodeURIComponent(animeQuery)}&variables=${encodeURIComponent(JSON.stringify(variables))}`;
+
     try {
-        const response = await fetch(ANILIST_API, {
-            method: 'POST',
+        const response = await fetch(url, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                query: animeQuery,
-                variables: variables
-            })
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
         });
 
-        // Проверяем, ответил ли сервер успехом (код 200-299)
         if (!response.ok) {
-            throw new Error(`Сервер ответил со статусом ${response.status}`);
+            throw new Error(`Ошибка соединения. Статус: ${response.status}`);
         }
 
         const data = await response.json();
         
         if (data.errors) {
-            console.error("Ошибки AniList API:", data.errors);
-            animeGrid.innerHTML = '<div class="loader" style="color: #ff4a4a;">Ошибка синтаксиса AniList. Подробности в консоли (F12).</div>';
+            console.error("Крическая ошибка структуры данных:", data.errors);
+            animeGrid.innerHTML = '<div class="loader" style="color: #ff4a4a;">Ошибка обработки структуры API AniList.</div>';
             return;
         }
 
         renderAnimeList(data.data.Page.media);
     } catch (error) {
-        console.error("Сетевая ошибка:", error);
-        
-        // Показываем конкретную техническую ошибку на экране для диагностики
+        console.error("Потеряно соединение:", error);
         animeGrid.innerHTML = `
-            <div class="loader" style="color: #ff4a4a; font-size: 14px; line-height: 1.8;">
-                <strong>Ошибка сетевого запроса!</strong><br>
-                Подробности: ${error.message}<br><br>
-                <span style="color: #fff; font-size: 13px;">
-                    💡 <strong>Как исправить:</strong><br>
-                    1. Если вы открыли файл как <code>file:///...</code>, браузер мог заблокировать запрос. Попробуйте загрузить папку на бесплатный хостинг (например, <a href="https://github.com" target="_blank" style="color: #45f3ff;">GitHub Pages</a> или Netlify).<br>
-                    2. Убедитесь, что у вас отключены строгие блокировщики рекламы (AdBlock) или VPN, которые могут блокировать запросы к домену graphql.anilist.co.
-                </span>
-            </div>
-        `;
+            <div class="loader" style="color: #ff4a4a; font-size: 14px; text-align: left; max-width: 600px; margin: 0 auto;">
+                <strong>Ошибка сетевого подключения к серверам AniList!</strong><br><br>
+                <span>Возможные причины:</span><br>
+                1. Локальные ограничения браузера на выполнение внешних скриптов.<br>
+                2. Сторонние плагины или AdBlock блокируют поддомены Graphql.<br><br>
+                <strong>Решение:</strong> Перетащите папку с сайтом на бесплатную платформу <a href="https://netlify.com" target="_blank" style="color:#45f3ff;">Netlify Drop</a>. Сайт запустится на удаленном сервере и всё заработает мгновенно.
+            </div>`;
     }
 }
 
@@ -116,6 +110,7 @@ function openPlayer(anime) {
     const title = anime.title.english || anime.title.romaji || anime.title.userPreferred;
     playerTitle.textContent = title;
     
+    // Подгрузка бесплатного плеера без токенов по ID Shikimori/MAL
     if (anime.idMal) {
         videoPlayer.src = `https://delivembed.cc{anime.idMal}`;
     } else {
@@ -123,14 +118,14 @@ function openPlayer(anime) {
     }
 
     animeInfo.innerHTML = `
-        <div class="anime-description">
-            <strong>Описание (ENG):</strong> <br>
+        <div style="margin-top: 15px; font-size: 14px;">
+            <strong>Сюжетная линия (ENG):</strong><br>
             ${anime.description ? anime.description : 'Описание отсутствует.'}
         </div>
     `;
 
     playerSection.classList.remove('hidden');
-    window.scrollTo({ top: playerSection.offsetTop - 100, behavior: 'smooth' });
+    window.scrollTo({ top: playerSection.offsetTop - 90, behavior: 'smooth' });
 }
 
 closePlayerBtn.addEventListener('click', () => {
@@ -157,4 +152,5 @@ logo.addEventListener('click', (e) => {
     fetchAnime();
 });
 
+// Первичный вызов пула популярных тайтлов
 fetchAnime();
