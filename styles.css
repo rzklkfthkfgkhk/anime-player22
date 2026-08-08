@@ -1,0 +1,230 @@
+:root {
+    --bg-main: #0b0c10;
+    --bg-card: #1f2833;
+    --accent: #45f3ff;
+    --text-main: #c5c6c7;
+    --text-bright: #ffffff;
+    --border-radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Шапка сайта */
+.header {
+    background-color: #151a21;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-bright);
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+
+.logo span {
+    color: var(--accent);
+}
+
+.search-box {
+    display: flex;
+    flex-grow: 0.5;
+    max-width: 500px;
+    width: 100%;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: var(--bg-main);
+    border: 1px solid #2f3b4c;
+    border-right: none;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    color: var(--text-bright);
+    font-size: 16px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.search-box input:focus {
+    border-color: var(--accent);
+}
+
+.search-box button {
+    padding: 0 25px;
+    background-color: var(--accent);
+    color: var(--bg-main);
+    border: none;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.search-box button:hover {
+    opacity: 0.9;
+}
+
+/* Сетка каталога */
+.catalog-section {
+    padding: 40px 0;
+}
+
+.section-title {
+    font-size: 22px;
+    margin-bottom: 25px;
+    color: var(--text-bright);
+    border-left: 4px solid var(--accent);
+    padding-left: 10px;
+}
+
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 25px;
+}
+
+/* Карточка аниме */
+.anime-card {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.anime-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(69, 243, 255, 0.2);
+}
+
+.anime-card img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+}
+
+.anime-card-info {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.anime-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.anime-card-year {
+    font-size: 12px;
+    color: #8b9bb4;
+    margin-top: auto;
+}
+
+/* Плеер */
+.player-section {
+    background-color: var(--bg-card);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    margin-top: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.btn-close {
+    background: transparent;
+    border: 1px solid #ff4a4a;
+    color: #ff4a4a;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    float: right;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-close:hover {
+    background-color: #ff4a4a;
+    color: white;
+}
+
+.anime-title {
+    margin-bottom: 20px;
+    color: var(--text-bright);
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* Пропорции 16:9 */
+    height: 0;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    background-color: #000;
+    margin-bottom: 20px;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.anime-description {
+    font-size: 14px;
+    color: var(--text-main);
+    margin-top: 15px;
+}
+
+.loader {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: var(--accent);
+}
